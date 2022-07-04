@@ -88,7 +88,7 @@ func (h *Handler) UpdateComment(w http.ResponseWriter, r *http.Request) {
 	})
 
 	if err != nil {
-		fmt.Fprintf(w, "Failed to updae comment")
+		fmt.Fprintf(w, "Failed to update comment")
 	}
 
 	fmt.Fprintf(w, "%+v", comment)
