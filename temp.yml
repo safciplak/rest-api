@@ -1,0 +1,39 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: comments-api
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      name: comments-api
+  template:
+    metadata:
+      labels:
+        name: comments-api
+    spec:
+      containers:
+      - name: application
+        image: "safakciplak1990/comments-api:latest"
+        imagePullPolicy: Always
+        ports:
+          - containerPort: 8080
+        env:
+          - name: DB_PORT
+            value: "5432"
+          - name: DB_HOST
+            value: "host.docker.internal"
+          - name: DB_PASSWORD
+            value: "postgres"
+          - name: DB_TABLE
+            value: "postgres"
+          - name: DB_USERNAME
+            value: "postgres"
+          - name: DB_NAME
+            value: "comments-api"
