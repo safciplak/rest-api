@@ -2,6 +2,7 @@ package http
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -40,6 +41,20 @@ type Response struct {
 	Error   string
 }
 
+// BasicAuth - a handy middleware function that will provide basic auth around specific endpoints
+func BasicAuth(original func(http.ResponseWriter, *http.Request)) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		log.Info("basic auth endpoint hit")
+		user, pass, ok := r.BasicAuth()
+		if user == "admin" && pass == "pass" && ok {
+			original(w, r)
+		} else {
+			w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+			sendErrorResponse(w, "not auhorized", errors.New("not authorized"))
+		}
+	}
+}
+
 // SetupRoutes - sets up all the routes for our application
 func (h *Handler) SetupRoutes() {
 	log.Info("Setting up routes")
@@ -47,10 +62,10 @@ func (h *Handler) SetupRoutes() {
 	h.Router.Use(LoggingMiddleware)
 
 	h.Router.HandleFunc("/api/comment", h.GetAllComments).Methods(http.MethodGet)
-	h.Router.HandleFunc("/api/comment", h.PostComment).Methods(http.MethodPost)
+	h.Router.HandleFunc("/api/comment", BasicAuth(h.PostComment)).Methods(http.MethodPost)
 	h.Router.HandleFunc("/api/comment/{id}", h.GetComment).Methods(http.MethodGet)
-	h.Router.HandleFunc("/api/comment/{id}", h.UpdateComment).Methods(http.MethodPut)
-	h.Router.HandleFunc("/api/comment/{id}", h.DeleteComment).Methods(http.MethodDelete)
+	h.Router.HandleFunc("/api/comment/{id}", BasicAuth(h.UpdateComment)).Methods(http.MethodPut)
+	h.Router.HandleFunc("/api/comment/{id}", BasicAuth(h.DeleteComment)).Methods(http.MethodDelete)
 
 	h.Router.HandleFunc("/api/health", func(w http.ResponseWriter, r *http.Request) {
 		if err := sendOkResponse(w, Response{Message: "I am Alive"}); err != nil {
