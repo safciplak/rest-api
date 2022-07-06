@@ -20,13 +20,12 @@ services:
     build: .
     container_name: "comments-rest-api"
     environment:
-      - DB_USERNAME="postgres"
-      - DB_PASSWORD="postgres"
-      - DB_DB="postgres"
-      - DB_HOST="db"
-      - DB_TABLE="postgres"
-      - DB_PORT="5432"
-      - SSL_MODE="disable"
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      DB_HOST: "host.docker.internal"
+      DB_NAME: postgres
+      DB_PORT: 5432
+      SSL_MODE: disable
     ports:
       - "8080:8080"
     depends_on:
